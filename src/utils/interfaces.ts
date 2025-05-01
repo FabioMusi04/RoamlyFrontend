@@ -1,6 +1,7 @@
 export interface MarkerData {
   geocode: [number, number];
   popUp: string;
+  _id: string;
 }
 
 export interface DescriptionMenuProps {
