@@ -7,9 +7,11 @@ import DescriptionMenu from "../components/markerMenu";
 import apiClient from "../utils/axios";
 
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
-import { MDBContainer, MDBRow, MDBCol } from "mdb-react-ui-kit";
+import { MDBContainer, MDBRow, MDBCol, MDBCard, MDBCardBody, MDBCardTitle, MDBCardText } from "mdb-react-ui-kit";
 import { DivIcon, Icon, divIcon, point, LatLng } from "leaflet";
+import { FaMapMarkerAlt, FaLocationArrow } from "react-icons/fa";
 import { MapEventsProps, MarkerData } from "../utils/interfaces";
+import { colorPalette } from "../utils/colorPalette"; // Import the color palette
 
 const customIcon = new Icon({
   iconUrl: placeholderIcon,
@@ -18,7 +20,7 @@ const customIcon = new Icon({
 
 const createClusterCustomIcon = (cluster: { getChildCount: () => number }): DivIcon => {
   return divIcon({
-    html: `<div style="background-color: rgba(0, 123, 255, 0.85); color: white; border-radius: 50%; width: 33px; height: 33px; display: flex; align-items: center; justify-content: center; font-size: 14px;">
+    html: `<div style="background-color: ${colorPalette.primary}; color: white; border-radius: 50%; width: 33px; height: 33px; display: flex; align-items: center; justify-content: center; font-size: 14px;">
              ${cluster.getChildCount()}
            </div>`,
     className: "custom-marker-cluster",
@@ -35,20 +37,21 @@ const MapEvents: React.FC<MapEventsProps> = ({ onAddMarker }) => {
   });
   return null;
 };
+
 interface Props {
   onMarkersFetched: (markers: MarkerData[]) => void;
 }
+
 const FetchClusteredMarkers: React.FC<Props> = ({ onMarkersFetched }) => {
   const map = useMap();
   const lastCenterRef = useRef<LatLng>(map.getCenter());
 
-  const fetchMarkers = async () => {
+  const fetchMarkers = React.useCallback(async () => {
     const center = map.getCenter();
     const lastCenter = lastCenterRef.current;
 
-    // Only fetch if the center changed significantly
     const distance = center.distanceTo(lastCenter);
-    if (distance < 100) return; // Skip if movement is less than 100 meters
+    if (distance < 100) return;
 
     lastCenterRef.current = center;
 
@@ -70,7 +73,7 @@ const FetchClusteredMarkers: React.FC<Props> = ({ onMarkersFetched }) => {
             popUp: marker.description,
           }))
         );
-        
+
         onMarkersFetched(flattenedMarkers);
       } else {
         console.error("Failed to fetch markers:", response.statusText);
@@ -78,17 +81,16 @@ const FetchClusteredMarkers: React.FC<Props> = ({ onMarkersFetched }) => {
     } catch (error) {
       console.error("Error fetching markers:", error);
     }
-  };
+  }, [map, onMarkersFetched]);
 
   useEffect(() => {
     map.on("moveend", fetchMarkers);
-    // Initial fetch
     fetchMarkers();
 
     return () => {
       map.off("moveend", fetchMarkers);
     };
-  }, [map]);
+  }, [fetchMarkers, map]);
 
   return null;
 };
@@ -97,13 +99,34 @@ const Home: React.FC = () => {
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [selectedMarker, setSelectedMarker] = useState<MarkerData | null>(null);
   const [description, setDescription] = useState("");
+  const [location, setLocation] = useState<{ lat: number; lng: number }>({ lat: 0, lng: 0 });
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (err) => {
+          console.error("Error getting location:", err);
+          setLocation({ lat: 0, lng: 0 });
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+      setLocation({ lat: 0, lng: 0 });
+    }
+  }, []);
 
   const handleAddMarker = async (marker: MarkerData) => {
     try {
       const response = await apiClient.post("/markers/", {
         description: marker.popUp,
         location: {
-          coordinates: [marker.geocode[1], marker.geocode[0]]
+          coordinates: [marker.geocode[1], marker.geocode[0]],
         },
       });
       if (response.status >= 200 && response.status < 300) {
@@ -141,7 +164,6 @@ const Home: React.FC = () => {
   const saveDescription = async () => {
     if (selectedMarker) {
       try {
-        console.log(JSON.stringify(selectedMarker));
         const response = await apiClient.put(`/markers/${selectedMarker._id}`, {
           description,
         });
@@ -198,37 +220,67 @@ const Home: React.FC = () => {
     <MDBContainer className="py-5">
       <MDBRow className="text-center mb-4">
         <MDBCol>
-          <h1>Welcome to Roamly</h1> {/* Add to spell-check ignore list */}
-          <p>Plan your next adventure by pointing the location of where you want to go!</p>
+          <MDBCard className="shadow-3" style={{ backgroundColor: colorPalette.primary, color: "white" }}>
+            <MDBCardBody>
+              <MDBCardTitle>
+                <FaMapMarkerAlt className="me-2" />
+                Welcome to Roamly
+              </MDBCardTitle>
+              <MDBCardText>
+                Plan your next adventure by pointing the location of where you want to go!
+              </MDBCardText>
+            </MDBCardBody>
+          </MDBCard>
+        </MDBCol>
+        <MDBCol>
+          <MDBCard className="shadow-3" style={{ backgroundColor: colorPalette.secondary, color: "white" }}>
+            <MDBCardBody>
+              <MDBCardTitle>
+                <FaLocationArrow className="me-2" />
+                Your Location
+              </MDBCardTitle>
+              {location.lat !== 0 && location.lng !== 0 ? (
+                <MDBCardText>
+                  Latitude: {location.lat}
+                  <br />
+                  Longitude: {location.lng}
+                </MDBCardText>
+              ) : (
+                <MDBCardText>Loading your location...</MDBCardText>
+              )}
+            </MDBCardBody>
+          </MDBCard>
         </MDBCol>
       </MDBRow>
       <MDBRow className="justify-content-center">
         <MDBCol md="12" style={{ position: "relative" }}>
-          <MapContainer center={[51.505, -0.09]} zoom={13} doubleClickZoom={false}>
-            <FetchClusteredMarkers onMarkersFetched={handleMarkersFetched} />
-            <MapEvents onAddMarker={handleAddMarker} />
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <MarkerClusterGroup chunkedLoading iconCreateFunction={createClusterCustomIcon}>
-              {markers.map((marker, index) => (
-                <Marker
-                  key={index}
-                  position={marker.geocode}
-                  icon={customIcon}
-                  eventHandlers={{
-                    click: () => {
-                      setSelectedMarker(marker);
-                      setDescription(marker.popUp);
-                    },
-                  }}
-                >
-                  <Popup>{marker.popUp || "No description yet"}</Popup>
-                </Marker>
-              ))}
-            </MarkerClusterGroup>
-          </MapContainer>
+          {location.lat !== 0 && location.lng !== 0 && (
+            <MapContainer center={[location.lat, location.lng]} zoom={6} doubleClickZoom={false} minZoom={4} maxZoom={18}>
+              <FetchClusteredMarkers onMarkersFetched={handleMarkersFetched} />
+              <MapEvents onAddMarker={handleAddMarker} />
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <MarkerClusterGroup chunkedLoading iconCreateFunction={createClusterCustomIcon}>
+                {markers.map((marker, index) => (
+                  <Marker
+                    key={index}
+                    position={marker.geocode}
+                    icon={customIcon}
+                    eventHandlers={{
+                      click: () => {
+                        setSelectedMarker(marker);
+                        setDescription(marker.popUp);
+                      },
+                    }}
+                  >
+                    <Popup>{marker.popUp || "No description yet"}</Popup>
+                  </Marker>
+                ))}
+              </MarkerClusterGroup>
+            </MapContainer>
+          )}
           {selectedMarker && (
             <DescriptionMenu
               description={description}
