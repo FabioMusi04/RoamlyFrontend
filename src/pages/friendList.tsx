@@ -1,16 +1,31 @@
-import React, { useState } from "react";
 import Sidebar from "../components/sideBarFriends";
 import PendingRequestsSent from "../components/pendingRequestsSent";
 import PendingRequestsReceived from "../components/pendingRequestsReceived";
 import SearchUsers from "../components/searchUser";
+import apiClient from "../utils/axios";
+
+import React, { useState, useEffect } from "react";
 
 const FriendList: React.FC = () => {
   const [activeSection, setActiveSection] = useState("search");
-  const [friends/* , setFriends */] = useState([
-    { id: 1, username: "JohnDoe", profilePicture: "https://via.placeholder.com/40" },
-    { id: 2, username: "JaneSmith", profilePicture: "https://via.placeholder.com/40" },
-    { id: 3, username: "AliceJohnson", profilePicture: "https://via.placeholder.com/40" },
-  ]);
+  const [friends, setFriends] = useState<
+    { id: number; username: string; profilePicture: string }[]
+  >([]);
+
+  useEffect(() => {
+    const fetchFriends = async () => {
+      try {
+        const response = await apiClient.get("/friendRequests/me", {
+          params: { status: "accepted" },
+        });
+        setFriends(response.data);
+      } catch (error) {
+        console.error("Error fetching friends:", error);
+      }
+    };
+
+    fetchFriends();
+  }, []);
 
   const renderSection = () => {
     switch (activeSection) {
@@ -19,19 +34,31 @@ const FriendList: React.FC = () => {
       case "friends":
         return (
           <div>
-        <h5>My Friends</h5>
-        <ul>
-          {friends.map((friend) => (
-            <li key={friend.id} style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-          <img
-            src={friend.profilePicture}
-            alt={`${friend.username}'s profile`}
-            style={{ width: "40px", height: "40px", borderRadius: "50%", marginRight: "10px" }}
-          />
-          <span>{friend.username}</span>
-            </li>
-          ))}
-        </ul>
+            <h5>My Friends</h5>
+            <ul>
+              {friends.map((friend) => (
+                <li
+                  key={friend.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <img
+                    src={friend.profilePicture}
+                    alt={`${friend.username}'s profile`}
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      marginRight: "10px",
+                    }}
+                  />
+                  <span>{friend.username}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         );
       case "received":
