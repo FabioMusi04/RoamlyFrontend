@@ -9,14 +9,16 @@ import Home from './pages/home';
 import Login from './pages/login';
 import Register from './pages/register';
 import NavbarMenu from './components/navbarMenu';
+import Profile from './pages/profilePage';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<><NavbarMenu isLoggedIn={true} /><Home /></>} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<><NavbarMenu isLoggedIn={true} /><Login /></>} />
+        <Route path="/register" element={<><NavbarMenu isLoggedIn={true} /><Register /></>} />
+        <Route path="/profile" element={<><NavbarMenu isLoggedIn={true} /><Profile /></>} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
