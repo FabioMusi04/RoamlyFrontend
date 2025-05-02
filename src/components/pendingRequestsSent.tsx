@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import apiClient from '../utils/axios';
-import { MDBListGroup, MDBListGroupItem } from 'mdb-react-ui-kit';
+import { MDBCard, MDBListGroup, MDBListGroupItem, MDBCardBody, MDBCardFooter, MDBCardHeader } from 'mdb-react-ui-kit';
 import { IRequest } from '../utils/interfaces';
 
 const PendingRequestsSent: React.FC = () => {
@@ -22,8 +22,11 @@ const PendingRequestsSent: React.FC = () => {
   }, []);
 
   return (
-    <div>
-      <h5>Pending Requests Sent</h5>
+    <MDBCard className="mt-4">
+      <MDBCardHeader className="text-center">
+        <h5>Pending Requests Sent</h5>
+      </MDBCardHeader>
+      <MDBCardBody>
       <MDBListGroup>
         {requests.map((request: IRequest, index: number) => (
           <MDBListGroupItem
@@ -60,7 +63,11 @@ const PendingRequestsSent: React.FC = () => {
         </MDBListGroupItem>
         ))}
       </MDBListGroup>
-    </div>
+      </MDBCardBody>
+      <MDBCardFooter className="text-center">
+        <p className="text-muted">You have {requests.length} pending requests sent.</p>
+      </MDBCardFooter>
+      </MDBCard>
   );
 };
 

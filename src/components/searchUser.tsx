@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import apiClient from "../utils/axios";
-import { MDBInput } from "mdb-react-ui-kit";
+import {
+  MDBInput,
+  MDBBtn,
+  MDBListGroup,
+  MDBListGroupItem,
+  MDBIcon,
+  MDBCard,
+  MDBCardBody,
+  MDBCardHeader,
+  MDBCardFooter,
+} from "mdb-react-ui-kit";
 
 const SearchUsers: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -33,53 +43,60 @@ const SearchUsers: React.FC = () => {
   };
 
   return (
-    <div>
-      <h5>Search Users</h5>
-      <MDBInput
-        label="Search by name"
-        type="text"
-        className="mb-3"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        onKeyDown={() => {
-          handleSearch();
-        }}
-      />
-      {results.length === 0 ? (
-        <p>0 users matched</p>
-      ) : (
-        <ul>
-          {results.map((user, index) => (
-            <li
-              key={index}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: "10px",
-              }}
-            >
-              <img
-                src={user.profilePicture}
-                alt={`${user.username}'s profile`}
-                style={{
-                  width: "30px",
-                  height: "30px",
-                  borderRadius: "50%",
-                  marginRight: "10px",
-                }}
-              />
-              <span style={{ marginRight: "10px" }}>{user.username}</span>
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={async () => await handleAddFriend(user._id)}
+    <MDBCard className="mt-4">
+      <MDBCardHeader className="text-center">
+        <h5>Search Users</h5>
+      </MDBCardHeader>
+      <MDBCardBody>
+        <MDBInput
+          label="Search by name"
+          type="text"
+          className="mb-3"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSearch();
+          }}
+        />
+        {results.length === 0 ? (
+          <p className="text-center text-muted">0 users matched</p>
+        ) : (
+          <MDBListGroup>
+            {results.map((user) => (
+              <MDBListGroupItem
+                key={user._id}
+                className="d-flex align-items-center justify-content-between"
               >
-                Add Friend
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+                <div className="d-flex align-items-center">
+                  <img
+                    src={user.profilePicture}
+                    alt={`${user.username}'s profile`}
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      marginRight: "10px",
+                    }}
+                  />
+                  <span>{user.username}</span>
+                </div>
+                <MDBBtn
+                  size="sm"
+                  color="primary"
+                  onClick={async () => await handleAddFriend(user._id)}
+                >
+                  <MDBIcon fas icon="user-plus" className="me-2" />
+                  Add Friend
+                </MDBBtn>
+              </MDBListGroupItem>
+            ))}
+          </MDBListGroup>
+        )}
+      </MDBCardBody>
+      <MDBCardFooter className="text-center text-muted">
+        Search and connect with friends!
+      </MDBCardFooter>
+    </MDBCard>
   );
 };
 

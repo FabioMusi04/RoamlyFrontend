@@ -14,7 +14,6 @@ const Sidebar: React.FC<{ setActiveSection: (section: string) => void }> = ({
     gap: "8px",
     fontSize: "16px",
     padding: "10px 15px",
-    borderRadius: "8px",
     transition: "background-color 0.3s ease",
   };
 
@@ -26,17 +25,13 @@ const Sidebar: React.FC<{ setActiveSection: (section: string) => void }> = ({
   return (
     <div
       style={{
-        width: "200px",
         backgroundColor: colorPalette.secondary,
         color: "white",
         borderRadius: "12px",
         boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-        display: "flex",
-        flexDirection: "column",
-        padding: "10px",
       }}
     >
-      <MDBListGroup style={{ gap: "10px" }}>
+      <MDBListGroup>
         <MDBListGroupItem
           tag="button"
           action
