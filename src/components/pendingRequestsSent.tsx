@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import apiClient from '../utils/axios';
 import { MDBListGroup, MDBListGroupItem } from 'mdb-react-ui-kit';
+import { IRequest } from '../utils/interfaces';
 
 const PendingRequestsSent: React.FC = () => {
   const [requests, setRequests] = useState([]);
@@ -24,7 +25,7 @@ const PendingRequestsSent: React.FC = () => {
     <div>
       <h5>Pending Requests Sent</h5>
       <MDBListGroup>
-        {requests.map((request: any, index: number) => (
+        {requests.map((request: IRequest, index: number) => (
           <MDBListGroupItem
           key={index}
           style={{

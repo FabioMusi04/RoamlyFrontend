@@ -21,4 +21,13 @@ export interface IUser {
   username: string;
   email: string;
   role: string;
+  profilePicture: string;
+}
+
+export interface IRequest { 
+  _id: string;
+  userId: IUser;
+  receiverId: IUser;
+  status: string;
+  createdAt: string;
 }
