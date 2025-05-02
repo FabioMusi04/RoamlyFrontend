@@ -1,3 +1,5 @@
+import apiClient from "../utils/axios";
+
 import React, { useState, useEffect } from "react";
 import {
   MDBContainer,
@@ -9,9 +11,8 @@ import {
   MDBBtn,
 } from "mdb-react-ui-kit";
 import { FaUserEdit, FaKey } from "react-icons/fa";
-import { colorPalette } from "../utils/colorPalette"; // Adjust the import path as necessary
+import { colorPalette } from "../utils/colorPalette";
 import { ChangePassword } from "../components/changePassword";
-import apiClient from "../utils/axios";
 
 const Profile: React.FC = () => {
   const [formData, setFormData] = useState({

@@ -10,6 +10,7 @@ import Login from './pages/login';
 import Register from './pages/register';
 import NavbarMenu from './components/navbarMenu';
 import Profile from './pages/profilePage';
+import FriendList from './pages/friendList';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/login" element={<><NavbarMenu isLoggedIn={true} /><Login /></>} />
         <Route path="/register" element={<><NavbarMenu isLoggedIn={true} /><Register /></>} />
         <Route path="/profile" element={<><NavbarMenu isLoggedIn={true} /><Profile /></>} />
+        <Route path="/friendList" element={<><NavbarMenu isLoggedIn={true} /><FriendList /></>} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
