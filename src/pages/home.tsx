@@ -112,12 +112,12 @@ const Home: React.FC = () => {
         },
         (err) => {
           console.error("Error getting location:", err);
-          setLocation({ lat: 0, lng: 0 });
+          setLocation({ lat: 51.505, lng: -0.09 }); // Default to London
         }
       );
     } else {
       console.error("Geolocation is not supported by this browser.");
-      setLocation({ lat: 0, lng: 0 });
+      setLocation({ lat: 51.505, lng: -0.09 }); // Default to London
     }
   }, []);
 
