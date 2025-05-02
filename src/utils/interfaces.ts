@@ -15,3 +15,10 @@ export interface DescriptionMenuProps {
 export interface MapEventsProps {
   onAddMarker: (marker: MarkerData) => void;
 }
+
+export interface IUser {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+}

@@ -1,3 +1,5 @@
+import apiClient from "../utils/axios";
+
 import { useState } from "react";
 import {
   MDBContainer,
@@ -5,13 +7,12 @@ import {
   MDBBtn,
   MDBIcon
 } from "mdb-react-ui-kit";
-import { useNavigate } from "react-router-dom";
-import apiClient from "../utils/axios";
+import { useAuth } from "../components/authProvider";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const { setUser, setToken } = useAuth();
 
   const handleLogin = async () => {
     try {
@@ -20,10 +21,12 @@ const Login = () => {
       if(response.status >= 200 && response.status < 300) {
         const { token, user } = response.data;
 
-        localStorage.setItem("authToken", token);
-        localStorage.setItem("loggedInUser", JSON.stringify(user));
+        setToken(token);
+        setUser(user);
 
-        return navigate("/");
+        alert("Login successful!");
+
+        return window.location.href = "/";
       }
 
       throw new Error("Login failed");
