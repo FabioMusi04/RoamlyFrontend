@@ -10,6 +10,7 @@ import {
 } from "mdb-react-ui-kit";
 import { DescriptionMenuProps } from "../utils/interfaces";
 import { FaTimes } from "react-icons/fa";
+import { colorPalette } from "../utils/colorPalette";
 
 const DescriptionMenu: React.FC<DescriptionMenuProps> = ({
   description,
@@ -50,31 +51,51 @@ const DescriptionMenu: React.FC<DescriptionMenuProps> = ({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: colorPalette.secondary,
+            color: "#fff",
           }}
           onClick={onClose}
         >
           <FaTimes />
         </MDBBtn>
-        <MDBCardTitle>Add Description</MDBCardTitle>
+        <MDBCardTitle style={{ color: colorPalette.primary }}>Add Description</MDBCardTitle>
         <MDBTextArea
           value={description}
           onChange={onDescriptionChange}
           rows={5}
           className="mb-3"
+          style={{
+            borderColor: colorPalette.secondary,
+          }}
         />
       </MDBCardBody>
       <div
         style={{
           padding: "1rem",
-          borderTop: "1px solid #ddd",
+          borderTop: `1px solid ${colorPalette.secondary}`,
           display: "flex",
           justifyContent: "space-between",
         }}
       >
-        <MDBBtn onClick={onSave} color="primary" className="me-2">
+        <MDBBtn
+          onClick={onSave}
+          color="primary"
+          className="me-2"
+          style={{
+            backgroundColor: colorPalette.primary,
+            borderColor: colorPalette.primary,
+          }}
+        >
           Save
         </MDBBtn>
-        <MDBBtn onClick={onCancel} color="danger">
+        <MDBBtn
+          onClick={onCancel}
+          color="danger"
+          style={{
+            backgroundColor: colorPalette.accent,
+            borderColor: colorPalette.accent,
+          }}
+        >
           Cancel Marker
         </MDBBtn>
       </div>

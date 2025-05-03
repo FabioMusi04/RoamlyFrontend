@@ -5,12 +5,13 @@ import MarkerClusterGroup from "react-leaflet-cluster";
 import placeholderIcon from "../assets/icons/placeholder.png";
 import DescriptionMenu from "../components/markerMenu";
 import apiClient from "../utils/axios";
+import FilterPanel from "../components/filterPanel";
 
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
 import { MDBContainer, MDBRow, MDBCol, MDBCard, MDBCardBody, MDBCardTitle, MDBCardText } from "mdb-react-ui-kit";
 import { DivIcon, Icon, divIcon, point, LatLng } from "leaflet";
 import { FaMapMarkerAlt, FaLocationArrow } from "react-icons/fa";
-import { MapEventsProps, MarkerData } from "../utils/interfaces";
+import { FilterType, MapEventsProps, MarkerData } from "../utils/interfaces";
 import { colorPalette } from "../utils/colorPalette"; // Import the color palette
 
 const customIcon = new Icon({
@@ -40,9 +41,10 @@ const MapEvents: React.FC<MapEventsProps> = ({ onAddMarker }) => {
 
 interface Props {
   onMarkersFetched: (markers: MarkerData[]) => void;
+  filter: FilterType;
 }
 
-const FetchClusteredMarkers: React.FC<Props> = ({ onMarkersFetched }) => {
+const FetchClusteredMarkers: React.FC<Props> = ({ onMarkersFetched, filter }) => {
   const map = useMap();
   const lastCenterRef = useRef<LatLng>(map.getCenter());
 
@@ -60,6 +62,7 @@ const FetchClusteredMarkers: React.FC<Props> = ({ onMarkersFetched }) => {
         params: {
           lat: center.lat,
           lng: center.lng,
+          filter: filter
         },
       });
 
@@ -81,7 +84,7 @@ const FetchClusteredMarkers: React.FC<Props> = ({ onMarkersFetched }) => {
     } catch (error) {
       console.error("Error fetching markers:", error);
     }
-  }, [map, onMarkersFetched]);
+  }, [map, onMarkersFetched, filter]);
 
   useEffect(() => {
     map.on("moveend", fetchMarkers);
@@ -100,6 +103,7 @@ const Home: React.FC = () => {
   const [selectedMarker, setSelectedMarker] = useState<MarkerData | null>(null);
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState<{ lat: number; lng: number }>({ lat: 0, lng: 0 });
+  const [filter, setFilter] = useState<FilterType>(FilterType.FRIENDS);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -213,12 +217,20 @@ const Home: React.FC = () => {
   };
 
   const handleMarkersFetched = (fetchedMarkers: MarkerData[]) => {
+    console.log("Fetched markers:", fetchedMarkers);
     setMarkers(fetchedMarkers);
   };
 
+  const handleFilterChange = (newFilter: FilterType) => {
+    setFilter(newFilter);
+  };
+
   return (
-    <MDBContainer className="py-5">
-      <MDBRow className="text-center mb-4">
+    <MDBContainer className="py-4">
+      <MDBRow className="text-center mb-2">
+        <MDBCol>
+          <FilterPanel filter={filter} onFilterChange={handleFilterChange} />
+        </MDBCol>
         <MDBCol>
           <MDBCard className="shadow-3" style={{ backgroundColor: colorPalette.primary, color: "white" }}>
             <MDBCardBody>
@@ -256,7 +268,7 @@ const Home: React.FC = () => {
         <MDBCol md="12" style={{ position: "relative" }}>
           {location.lat !== 0 && location.lng !== 0 && (
             <MapContainer center={[location.lat, location.lng]} zoom={6} doubleClickZoom={false} minZoom={4} maxZoom={18}>
-              <FetchClusteredMarkers onMarkersFetched={handleMarkersFetched} />
+              <FetchClusteredMarkers onMarkersFetched={handleMarkersFetched} filter={filter} />
               <MapEvents onAddMarker={handleAddMarker} />
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

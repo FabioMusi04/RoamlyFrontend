@@ -31,3 +31,8 @@ export interface IRequest {
   status: string;
   createdAt: string;
 }
+
+export enum FilterType {
+  YOURS = "yours",
+  FRIENDS = "friends",
+}
