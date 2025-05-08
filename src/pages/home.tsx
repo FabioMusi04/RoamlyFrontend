@@ -2,22 +2,16 @@ import "leaflet/dist/leaflet.css";
 
 import React, { useState, useEffect, useRef } from "react";
 import MarkerClusterGroup from "react-leaflet-cluster";
-import placeholderIcon from "../assets/icons/placeholder.png";
 import DescriptionMenu from "../components/markerMenu";
 import apiClient from "../utils/axios";
 import FilterPanel from "../components/filterPanel";
 
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
 import { MDBContainer, MDBRow, MDBCol, MDBCard, MDBCardBody, MDBCardTitle, MDBCardText } from "mdb-react-ui-kit";
-import { DivIcon, Icon, divIcon, point, LatLng } from "leaflet";
+import { DivIcon, Icon, divIcon, point, LatLng, Util } from "leaflet";
 import { FaMapMarkerAlt, FaLocationArrow } from "react-icons/fa";
 import { FilterType, MapEventsProps, MarkerData } from "../utils/interfaces";
-import { colorPalette } from "../utils/colorPalette"; // Import the color palette
-
-const customIcon = new Icon({
-  iconUrl: placeholderIcon,
-  iconSize: [38, 38],
-});
+import { colorPalette, getColoredHeartSvg } from "../utils/colorPalette"; // Import the color palette
 
 const createClusterCustomIcon = (cluster: { getChildCount: () => number }): DivIcon => {
   return divIcon({
@@ -27,6 +21,19 @@ const createClusterCustomIcon = (cluster: { getChildCount: () => number }): DivI
     className: "custom-marker-cluster",
     iconSize: point(33, 33, true),
   });
+};
+
+const stringToColor = (str: string): string => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  let color = "#";
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xff;
+    color += ("00" + value.toString(16)).slice(-2);
+  }
+  return color;
 };
 
 const MapEvents: React.FC<MapEventsProps> = ({ onAddMarker }) => {
@@ -68,13 +75,16 @@ const FetchClusteredMarkers: React.FC<Props> = ({ onMarkersFetched, filter }) =>
 
       if (response.status >= 200 && response.status < 300) {
         const data = response.data;
-
-        const flattenedMarkers: MarkerData[] = data.flatMap((cluster: { markers: { _id: string; location: { coordinates: [number, number] }; description: string }[] }) =>
-          cluster.markers.map((marker: { _id: string; location: { coordinates: [number, number] }; description: string }): MarkerData => ({
-            _id: marker._id,
-            geocode: [marker.location.coordinates[1], marker.location.coordinates[0]],
-            popUp: marker.description,
-          }))
+        const flattenedMarkers: MarkerData[] = data.flatMap(
+          (cluster: { markers: { _id: string; location: { coordinates: [number, number] }; description: string; userId: string }[] }) =>
+            cluster.markers.map(
+              (marker: { _id: string; location: { coordinates: [number, number] }; description: string; userId: string }): MarkerData => ({
+                _id: marker._id,
+                geocode: [marker.location.coordinates[1], marker.location.coordinates[0]],
+                popUp: marker.description,
+                color: stringToColor(marker.userId), // generate color from userId
+              })
+            )
         );
 
         onMarkersFetched(flattenedMarkers);
@@ -217,7 +227,6 @@ const Home: React.FC = () => {
   };
 
   const handleMarkersFetched = (fetchedMarkers: MarkerData[]) => {
-    console.log("Fetched markers:", fetchedMarkers);
     setMarkers(fetchedMarkers);
   };
 
@@ -279,13 +288,19 @@ const Home: React.FC = () => {
                   <Marker
                     key={index}
                     position={marker.geocode}
-                    icon={customIcon}
+                    icon={
+                      new Icon({
+                        iconUrl: 'data:image/svg+xml;base64,' + btoa(getColoredHeartSvg(marker.color || colorPalette.accent)),
+                        iconSize: [38, 38],
+                      })
+                    }
                     eventHandlers={{
                       click: () => {
                         setSelectedMarker(marker);
                         setDescription(marker.popUp);
                       },
                     }}
+                    
                   >
                     <Popup>{marker.popUp || "No description yet"}</Popup>
                   </Marker>
