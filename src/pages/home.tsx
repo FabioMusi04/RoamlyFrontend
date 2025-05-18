@@ -8,7 +8,7 @@ import FilterPanel from "../components/filterPanel";
 
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
 import { MDBContainer, MDBRow, MDBCol, MDBCard, MDBCardBody, MDBCardTitle, MDBCardText } from "mdb-react-ui-kit";
-import { DivIcon, Icon, divIcon, point, LatLng, Util } from "leaflet";
+import { DivIcon, Icon, divIcon, point, LatLng } from "leaflet";
 import { FaMapMarkerAlt, FaLocationArrow } from "react-icons/fa";
 import { FilterType, MapEventsProps, MarkerData } from "../utils/interfaces";
 import { colorPalette, getColoredHeartSvg } from "../utils/colorPalette"; // Import the color palette
